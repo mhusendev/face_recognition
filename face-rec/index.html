@@ -1,0 +1,130 @@
+<html>
+    <head>
+        <title>Webcam</title>
+        <style>
+        body {
+      margin: 0;
+      padding: 0;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    canvas {
+      position: absolute;
+    }
+        </style>
+    </head>
+    <body>
+            <!-- <div id="container"> -->
+       
+            <video autoplay="true" id="videoElement" muted></video>
+             <canvas id="canvas" class="overlay"></canvas>
+                   <audio id="myAudio">
+  <source src="verified.ogg" type="audio/ogg">
+  <source src="verified.mp3" type="audio/mpeg">
+  Your browser does not support the audio element.
+</audio>
+            <!-- </div> -->
+            
+        <script src="js/jquery-2.1.1.min.js"></script>
+        <script src="js/face-api.js"></script>
+        <script>
+            
+          $(document).ready(function(){
+
+               var audioplay = document.getElementById("myAudio"); 
+
+                let video = document.querySelector("#videoElement");
+                let currentStream;
+                let displaySize;
+
+                if (navigator.mediaDevices.getUserMedia) {
+                navigator.mediaDevices.getUserMedia({ video: true })
+                    .then(function (stream) {
+                    video.srcObject = stream;
+                    })
+                    .catch(function (err0r) {
+                    console.log("Something went wrong!");
+                    });
+                }
+                
+                let temp = []
+                $("#videoElement").bind("loadedmetadata", function(){
+                    displaySize = { width:this.scrollWidth, height: this.scrollHeight }
+
+                    async function detect(){
+
+                        const MODEL_URL = './models'
+
+                        await faceapi.loadSsdMobilenetv1Model(MODEL_URL)
+                        await faceapi.loadFaceLandmarkModel(MODEL_URL)
+                        await faceapi.loadFaceRecognitionModel(MODEL_URL)
+
+                        let canvas = $("#canvas").get(0);
+
+                        facedetection = setInterval(async () =>{
+
+                            let fullFaceDescriptions = await faceapi.detectAllFaces(video).withFaceLandmarks().withFaceDescriptors()
+                            let canvas = $("#canvas").get(0);
+                            faceapi.matchDimensions(canvas, displaySize)
+
+                            const fullFaceDescription = faceapi.resizeResults(fullFaceDescriptions, displaySize)
+                            // faceapi.draw.drawDetections(canvas, fullFaceDescriptions)
+
+                            const labels = ["tokyo","husen"]
+
+                            const labeledFaceDescriptors = await Promise.all(
+                                labels.map(async label => {
+                                    // fetch image data from urls and convert blob to HTMLImage element
+                                    const imgUrl = `img/${label}.JPG`
+                                    const img = await faceapi.fetchImage(imgUrl)
+                                    
+                                    // detect the face with the highest score in the image and compute it's landmarks and face descriptor
+                                    const fullFaceDescription = await faceapi.detectSingleFace(img).withFaceLandmarks().withFaceDescriptor()
+                                     
+                                    if (!fullFaceDescription) {
+                                    throw new Error(`no faces detected for ${label}`)
+                                    }
+                                    
+                                    const faceDescriptors = [fullFaceDescription.descriptor]
+                                    return new faceapi.LabeledFaceDescriptors(label, faceDescriptors)
+                                })
+                            );
+
+                            const maxDescriptorDistance = 0.6
+                            const faceMatcher = new faceapi.FaceMatcher(labeledFaceDescriptors, maxDescriptorDistance)
+
+                            const results = fullFaceDescriptions.map(fd => faceMatcher.findBestMatch(fd.descriptor))
+
+                            results.forEach((bestMatch, i) => {
+                                const box = fullFaceDescriptions[i].detection.box
+                                const text = bestMatch.toString()
+
+                                const drawBox = new faceapi.draw.DrawBox(box, { label: text })
+                                drawBox.draw(canvas)
+                                setTimeout(function(){ if (text.substring(0, 5) == "husen") {
+
+                                  audioplay.play(); 
+                                 
+
+                                } }, 2000);
+                                
+                            })
+
+                        },100);
+
+                        console.log(displaySize)
+                    }
+                    detect()
+                    // console.log(this.scrollHeight);
+                });   
+
+          })  
+
+            
+        </script>
+    </body>
+</html>
