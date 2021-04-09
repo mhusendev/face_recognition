@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <script defer src="face-api.min.js"></script>
+  <script defer src="script.js"></script>
+  <title>Face Recognition</title>
+  <style>
+    .button-group, .play-area {
+  border: 1px solid grey;
+  padding: 1em 1%;
+  margin-bottom: 1em;
+}
+
+.button {
+  padding: 0.5em;
+  margin-right: 1em;
+}
+
+.play-area-sub {
+  width: 47%;
+  padding: 1em 1%;
+  display: inline-block;
+  text-align: center;
+}
+
+#capture {
+  display: none;
+}
+
+
+    body {
+      margin: 0;
+      padding: 0;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column
+    }
+
+    canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="button-group">
+  <button id="btn-start" type="button" class="button">Start Streaming</button>
+  <button id="btn-stop" type="button" class="button">Stop Streaming</button>
+  <button id="btn-capture" type="button" class="button">Capture Image</button>
+</div>
+
+<!-- Video Element & Canvas -->
+<div class="play-area">
+  <div class="play-area-sub">
+    <h3>The Stream</h3>
+    <video id="stream" width="320" height="240"></video>
+  </div>
+  <div class="play-area-sub">
+    
+    <canvas id="capture" width="320" height="240"></canvas>
+    <div id="snapshot"></div>
+  </div>
+</div>
+  <input type="file" id="imageUpload">
+</body>
+</html>
