@@ -74,7 +74,7 @@
                             const fullFaceDescription = faceapi.resizeResults(fullFaceDescriptions, displaySize)
                             // faceapi.draw.drawDetections(canvas, fullFaceDescriptions)
 
-                            const labels = ["tokyo","husen"]
+                            const labels = ["tokyo","Muhammad Husen"]
 
                             const labeledFaceDescriptors = await Promise.all(
                                 labels.map(async label => {
@@ -102,15 +102,18 @@
                             results.forEach((bestMatch, i) => {
                                 const box = fullFaceDescriptions[i].detection.box
                                 const text = bestMatch.toString()
+                                const text2 = text.replace(/\([^]+$/, '');
+                              
 
-                                const drawBox = new faceapi.draw.DrawBox(box, { label: text })
+                                const drawBox = new faceapi.draw.DrawBox(box, { label: text2 })
                                 drawBox.draw(canvas)
-                                setTimeout(function(){ if (text.substring(0, 5) == "husen") {
+                                setTimeout(function(){
 
-                                  audioplay.play(); 
+                                //   audioplay.play(); 
+                                // console.log(text2)
                                  
 
-                                } }, 2000);
+                                 }, 2000);
                                 
                             })
 
